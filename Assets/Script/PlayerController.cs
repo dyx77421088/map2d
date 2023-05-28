@@ -24,14 +24,37 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        this.transform.position += new Vector3(moveV2.x * speed * Time.deltaTime, 0, 0);
+        //this.transform.position += new Vector3(moveV2.x * speed * Time.deltaTime, 0, 0);
+        Vector2 v2 = rb2d.velocity;
+        v2.x = 0;
+        rb2d.velocity = v2; 
+        if (moveV2.x != 0)
+        {
+            rb2d.velocity = new Vector2(moveV2.x * speed, rb2d.velocity.y);
+        }
+
+        if (moveV2.y == 0 && jumpCount != maxJumpCount)
+        {
+            Debug.Log("在里面呢");
+            var raycastHitAll = Physics2D.RaycastAll(this.transform.position, Vector2.down, 0.7f);
+            Debug.DrawLine(this.transform.position, this.transform.position + new Vector3(0, -0.7f));
+            foreach (var hit in raycastHitAll)
+            {
+                Debug.Log(hit.collider.gameObject.tag);
+                if (hit.collider.gameObject.tag == "floor")
+                {
+                    jumpCount = maxJumpCount;
+                }
+            }
+        }
+        
     }
 
     public void Jump(CallbackContext c)
     {
         if (c.performed && --jumpCount >= 0)
         {
-            rb2d.AddForce(Vector2.up * 5, ForceMode2D.Impulse);
+            rb2d.velocity = Vector2.up * 5 ;
         }
     }
 
@@ -57,17 +80,13 @@ public class PlayerController : MonoBehaviour
             .Start();
     }
 
-    private void OnTriggerEnter2D(Collider2D collision)
-    {
-        
-    }
-
     private void OnCollisionEnter2D(Collision2D collision)
     {
         Debug.Log("进来了，碰撞");
         if (collision.gameObject.tag == "floor")
         {
-            //jumpCount = maxJumpCount;
+            
+            
         }
     }
 }
